@@ -49,12 +49,16 @@ module ActiveModelSerializers
 
     # Get serializer either explicitly :serializer or implicitly from resource
     # Remove :serializer key from serializer_opts
+    # Use :serialization_context_class to override serializer_for resource in a specific context
+    #   or use default context (ActiveModel::Serializer)
+    # Remove :serialization_context_class from serializer_opts
     # Replace :serializer key with :each_serializer if present
     def serializer
       @serializer ||=
         begin
           @serializer = serializer_opts.delete(:serializer)
-          @serializer ||= ActiveModel::Serializer.serializer_for(resource)
+          serializer_context_class = serializer_opts.delete(:serialization_context_class) || ActiveModel::Serializer
+          @serializer ||= serializer_context_class.serializer_for(resource)
 
           if serializer_opts.key?(:each_serializer)
             serializer_opts[:serializer] = serializer_opts.delete(:each_serializer)
